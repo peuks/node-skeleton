@@ -1,6 +1,6 @@
 # Base stage
 # ---------------------------------------
-FROM node:14.17-alpine3.13 AS base
+FROM node:17-alpine AS base
 
 # This get shared across later stages
 WORKDIR /node
@@ -18,13 +18,11 @@ EXPOSE $SERVER_PORT 9229
 COPY --chown=node:node package*.json ./
 
 RUN \
-  NODE_ENV=development && \
-  npm ci && \
-  npm cache clean --force
+  NODE_ENV=development && npm ci && npm cache clean --force
 
 WORKDIR /node/app
 
-CMD [ "nodemon" ]
+CMD [ "npm","run","dev" ]
 
 # Source stage
 # ---------------------------------------
@@ -37,8 +35,7 @@ WORKDIR /node
 COPY --chown=node:node package*.json ./
 
 RUN \
-  npm ci --no-optional && \
-  npm cache clean --force
+  npm ci --no-optional && npm cache clean --force
 
 COPY --chown=node:node . .
 
@@ -53,8 +50,7 @@ ENV PATH /node/node_modules/.bin:$PATH
 COPY --chown=node:node --from=development /node/node_modules /node/node_modules
 
 RUN \
-  npm run test && \
-  npm run lint
+  npm run test && npm run lint
 
 # Production stage
 # ---------------------------------------
@@ -67,4 +63,4 @@ ENV SERVER_PORT=3000
 
 EXPOSE $SERVER_PORT
 
-CMD [ "node", "./bin/www" ]
+CMD [ "npm", "start" ]
