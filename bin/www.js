@@ -5,8 +5,10 @@ import * as http from 'http';
 import stoppable from 'stoppable';
 import { promisify } from 'util';
 import connectDB from '../config/connectDB.js';
-import to from '../helper/to.js';
 import app from '../src/app.js';
+import session from 'express-session';
+import { Server } from 'socket.io';
+import cors from 'cors';
 
 const SIGINT = 'SIGINT';
 const SIGTERM = 'SIGTERM';
@@ -23,6 +25,45 @@ const start = async () => {
   app.set('port', SERVER_PORT);
 
   const server = stoppable(http.createServer(app), SERVER_CLOSE_GRACE);
+
+  const io = new Server(server, { cors: { origin: '*' } });
+
+  // hook up session for express routes
+  const sessionMiddleware = session({
+    // genid: req => uuidv4(),
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {},
+  });
+
+  // hook up the session for socket.io connections
+  io.use((socket, next) => sessionMiddleware(socket.request, socket.request.res || {}, next));
+  app.use(sessionMiddleware);
+
+  io.on('connection', (socket) => {
+    // socket.handshake.headers
+    console.log(`socket.io connected: ${socket.id}`);
+
+    const { roomId } = socket.handshake.query;
+    socket.join(roomId);
+
+    // Leave the room if the user closes the socket
+    socket.on('disconnect', () => {
+      console.log(`Client ${socket.id} diconnected`);
+      socket.leave(roomId);
+    });
+  });
+
+  
+  app.use((req, res, next) => {
+    req.io = io;
+    next();
+  });
+
+
+
+
   const serverClose = promisify(server.stop.bind(server));
 
   // Handle a shutdown event

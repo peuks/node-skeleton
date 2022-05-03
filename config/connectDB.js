@@ -3,13 +3,21 @@ import mongoose from 'mongoose';
 import to from '../helper/to.js';
 config();
 
-const { MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD, MONGO_INITDB_DATABASE, DB_HOST } =
-  process.env;
+const { 
+  MONGO_INITDB_ROOT_USERNAME,
+  MONGO_INITDB_ROOT_PASSWORD,
+  MONGO_INITDB_DATABASE,
+  DB_HOST 
+} =
+process.env;
+
+const PARAMS="readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false"
 
 const db = `mongodb://${MONGO_INITDB_ROOT_USERNAME}
+
 :${MONGO_INITDB_ROOT_PASSWORD}@
 ${DB_HOST}/
-${MONGO_INITDB_DATABASE}?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false`;
+${MONGO_INITDB_DATABASE}?${PARAMS}`;
 
 const connectDB = () => {
   mongoose
