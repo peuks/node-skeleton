@@ -55,14 +55,10 @@ const start = async () => {
     });
   });
 
-  
   app.use((req, res, next) => {
     req.io = io;
     next();
   });
-
-
-
 
   const serverClose = promisify(server.stop.bind(server));
 

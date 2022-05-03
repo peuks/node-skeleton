@@ -1,6 +1,7 @@
 # docker-compose.yml
 services:
   app:
+    container_name: ${PROJECT_NAME}_API
     build:
       context: .
       target: ${NODE_ENV}
@@ -72,6 +73,8 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     env_file:
       - .env
+    ports:
+      - '27017:27017'
     volumes:
       - './docker/mongo/mongo-entrypoint/:/docker-entrypoint-initdb.d/init-mongo-js:ro'
       - ./db:/data/db
