@@ -1,0 +1,55 @@
+# docker-compose.yml
+services:
+  app:
+    container_name: ${PROJECT_NAME}_API
+    build:
+      context: .
+      target: ${NODE_ENV}
+      args:
+        - NODE_ENV=${NODE_ENV}
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - SERVER_PORT=${SERVER_PORT}
+    ports:
+      # - '3000:${SERVER_PORT}'
+      - '9229:9229'
+    volumes:
+      - .:/node/app:delegated
+      - /node/app/node_modules
+    labels:
+      - 'traefik.http.services.web.loadbalancer.server.port=${SERVER_PORT}'
+      - 'traefik.http.routers.api.rule=Host(`api.traefik.me`)'
+      - 'traefik.http.routers.api-tls.tls.domains[0].main=api.traefik.me'
+      - 'traefik.http.routers.api-tls.tls.domains[0].sans=api-*.traefik.me'
+      - 'traefik.http.routers.api.tls=true'
+    networks:
+      - dev
+
+  mongo:
+    container_name: ${PROJECT_NAME}_MONGO
+    hostname: mongo
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    env_file:
+      - .env
+    ports:
+      - '27017:27017'
+    volumes:
+      - './docker/mongo/mongo-entrypoint/:/docker-entrypoint-initdb.d/init-mongo-js:ro'
+      - ./db:/data/db
+    networks:
+      - dev
+
+  mongodata:
+    container_name: ${PROJECT_NAME}_MONGO_DATA
+    image: mongo:3.0.4
+    volumes:
+      - /data/db
+    networks:
+      - dev
+networks:
+  dev:
+    external: true
