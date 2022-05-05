@@ -1,0 +1,25 @@
+services:
+  app:
+    container_name: ${PROJECT_NAME}_API
+    build:
+      context: .
+      target: ${NODE_ENV}
+      args:
+        - NODE_ENV=${NODE_ENV}
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - SERVER_PORT=${SERVER_PORT}
+    volumes:
+      - .:/node/app:delegated
+      - /node/app/node_modules
+    labels:
+      - "traefik.http.services.web.loadbalancer.server.port=${SERVER_PORT}"
+      - "traefik.http.routers.ui.rule=Host(`ui.traefik.me`)"
+      - "traefik.http.routers.ui-tls.tls.domains[0].main=ui.traefik.me"
+      - "traefik.http.routers.ui-tls.tls.domains[0].sans=ui-*.traefik.me"
+      - "traefik.http.routers.ui.tls=true"
+    networks:
+      - dev
+networks:
+  dev:
+    external: true
