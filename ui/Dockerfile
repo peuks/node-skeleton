@@ -17,13 +17,12 @@ EXPOSE $SERVER_PORT 9229
 
 COPY --chown=node:node package*.json ./
 
-RUN \
-    NODE_ENV=development && npm ci && npm cache clean --force
+RUN NODE_ENV=development && npm ci && npm cache clean --force
 
 WORKDIR /node/app
 EXPOSE $SERVER_PORT
 
-CMD [ "npm","run","dev" ]
+CMD [ "npm","run","start" ]
 
 # Source stage
 # ---------------------------------------
@@ -64,4 +63,4 @@ ENV SERVER_PORT=3000
 
 EXPOSE $SERVER_PORT
 
-CMD [ "npm","run","dev" ]
+CMD [ "npm","run","start" ]
