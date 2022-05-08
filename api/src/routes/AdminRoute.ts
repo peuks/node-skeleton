@@ -3,7 +3,7 @@ import { CreateVandor, GetVanndors, GetVandorByID } from '../controllers/AdminCo
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
+router.get('/', (req, res, next) => {
   return res.status(200).json({ response: 'Hello from  ADMINROUTE' });
 });
 
